@@ -1,0 +1,13 @@
+# Dependency directories
+node_modules/
+
+# Ignore all environment files (Security)
+.env*
+
+# Ignore all markdown files...
+*.md
+
+# ...BUT keep README.md (and case-insensitive variants)
+!README.md
+!readme.md
+!Readme.md

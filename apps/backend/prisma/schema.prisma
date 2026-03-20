@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ApiKey {
+  id         String           @id @default(cuid())
+  key        String           @unique
+  name       String
+  rateLimit  Int
+  createdAt  DateTime         @default(now())
+  usageLogs  UsageLog[]
+  blockedRequests BlockedRequest[]
+}
+
+model UsageLog {
+  id        String   @id @default(cuid())
+  apiKeyId  String
+  path      String
+  status    Int
+  timestamp DateTime @default(now())
+  apiKey    ApiKey   @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@index([apiKeyId, timestamp])
+}
+
+model BlockedRequest {
+  id        String   @id @default(cuid())
+  apiKeyId  String
+  path      String
+  reason    String
+  timestamp DateTime @default(now())
+  apiKey    ApiKey   @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@index([apiKeyId, timestamp])
+}
