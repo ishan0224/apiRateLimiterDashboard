@@ -8,12 +8,8 @@ node_modules/
 # ── Markdown (internal notes / docs) ─────────────────────────────────────────
 # Keep only the root README; all other .md files (incl. *.notes.md) are ignored
 *.md
+locanotes.md
 !README.md
-!readme.md
-!Readme.md
-**/README.md
-**/readme.md
-**/Readme.md
 
 # ── Next.js ──────────────────────────────────────────────────────────────────
 .next/
