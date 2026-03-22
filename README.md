@@ -4,9 +4,11 @@ Operator-facing rate limiter + observability dashboard built with Next.js, Redis
 
 ## Demo
 
-Add your GIF to `docs/demo.gif` (or any path you prefer) and keep this section in the repo so the project is easy to review even after cloud teardown.
+### Operator Dashboard
+![Dashboard Overview](docs/demo1.gif)
 
-![Project Demo](docs/demo.gif)
+### Rate Limiter in Action
+![Rate Limiting Logic](docs/demo2.gif)
 
 ## Why This Project
 
