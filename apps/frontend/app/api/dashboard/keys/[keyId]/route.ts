@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { parseRangeParams } from "@/lib/api/schemas";
 import { fetchApiKeyDetail } from "@/lib/server/dashboard-queries";
+import { withServerCache } from "@/lib/server/cache";
 
 type Params = {
   params: Promise<{ keyId: string }>;
@@ -16,7 +17,11 @@ export async function GET(request: NextRequest, { params }: Params) {
       to: searchParams.get("to") ?? undefined,
     });
 
-    const data = await fetchApiKeyDetail(keyId, from, to);
+    const data = await withServerCache(
+      `key-detail:${keyId}:${from.toISOString()}:${to.toISOString()}`,
+      15_000,
+      () => fetchApiKeyDetail(keyId, from, to)
+    );
 
     if (!data) {
       return NextResponse.json({ error: "API key not found" }, { status: 404 });

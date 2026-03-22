@@ -90,3 +90,8 @@ export type PipelineHealthResponse = {
   queueLagSeconds: number;
   lastIngestAt: string | null;
 };
+
+export type DashboardSnapshotResponse = {
+  overview: OverviewResponse;
+  pipelineHealth: PipelineHealthResponse;
+};

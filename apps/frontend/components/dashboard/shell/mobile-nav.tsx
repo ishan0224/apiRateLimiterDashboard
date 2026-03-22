@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Activity, Gauge, KeyRound, ShieldAlert } from "lucide-react";
 
 import { cn } from "@/lib/utils/cn";
@@ -15,6 +15,7 @@ const items = [
 
 export function MobileNav() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   return (
     <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white px-3 py-2 md:hidden">
@@ -26,7 +27,7 @@ export function MobileNav() {
           return (
             <li key={item.href}>
               <Link
-                href={item.href}
+                href={`${item.href}?${searchParams.toString()}`}
                 className={cn(
                   "flex flex-col items-center gap-1 rounded-lg px-1 py-2 text-[11px] font-medium",
                   active ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"

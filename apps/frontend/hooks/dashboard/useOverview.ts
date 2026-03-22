@@ -1,11 +1,17 @@
 "use client";
 
-import { fetchOverview } from "@/lib/api/dashboard";
-import { useDashboardQuery } from "./useDashboardQuery";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-export function useOverview(from: string, to: string) {
-  return useDashboardQuery(
-    `overview:${from}:${to}`,
-    (signal) => fetchOverview({ from, to }, signal)
-  );
+import { fetchSnapshot } from "@/lib/api/dashboard";
+import { dashboardQueryConfig, queryKeySnapshot } from "@/lib/query/dashboard-query";
+
+export function useOverviewSnapshot(from: string, to: string) {
+  return useQuery({
+    queryKey: queryKeySnapshot(from, to),
+    queryFn: () => fetchSnapshot({ from, to }),
+    staleTime: dashboardQueryConfig.staleTime,
+    gcTime: dashboardQueryConfig.gcTime,
+    refetchInterval: dashboardQueryConfig.refetchInterval,
+    placeholderData: keepPreviousData,
+  });
 }

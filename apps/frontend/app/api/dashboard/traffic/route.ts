@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { parseRangeParams, trafficQuerySchema } from "@/lib/api/schemas";
 import { fetchTraffic } from "@/lib/server/dashboard-queries";
+import { withServerCache } from "@/lib/server/cache";
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,7 +21,11 @@ export async function GET(request: NextRequest) {
 
     const granularity = parsed.success ? parsed.data.granularity ?? "1h" : "1h";
 
-    const data = await fetchTraffic(from, to, granularity);
+    const data = await withServerCache(
+      `traffic:${from.toISOString()}:${to.toISOString()}:${granularity}`,
+      15_000,
+      () => fetchTraffic(from, to, granularity)
+    );
 
     return NextResponse.json(data);
   } catch (error) {

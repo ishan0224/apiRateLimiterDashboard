@@ -1,25 +1,31 @@
 "use client";
 
-import { useState } from "react";
-
 import { TopBar } from "@/components/dashboard/shell/top-bar";
 import { StatusChart } from "@/components/dashboard/charts/status-chart";
 import { TrafficChart } from "@/components/dashboard/charts/traffic-chart";
 import { WidgetState } from "@/components/dashboard/states/widget-state";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useRange } from "@/hooks/dashboard/useRange";
+import { useDashboardFilters } from "@/hooks/dashboard/useDashboardFilters";
+import { useOverviewSnapshot } from "@/hooks/dashboard/useOverview";
 import { useTraffic } from "@/hooks/dashboard/useTraffic";
 import { formatInteger } from "@/lib/formatters/number";
 
+
 export default function TrafficPage() {
-  const { range, setRange, from, to } = useRange();
-  const [granularity, setGranularity] = useState<"15m" | "1h" | "1d">("1h");
-  const { data, isLoading, error, refetch } = useTraffic(from, to, granularity);
+  const { range, setRange, from, to, granularity, setGranularity } = useDashboardFilters();
+  const { data, isLoading, isFetching, error, refetch } = useTraffic(from, to, granularity);
+  const snapshotQuery = useOverviewSnapshot(from, to);
 
   return (
     <div>
-      <TopBar range={range} onRangeChange={setRange} onRefresh={() => void refetch()} />
+      <TopBar
+        range={range}
+        onRangeChange={setRange}
+        onRefresh={() => void refetch()}
+        updatedAt={snapshotQuery.data?.overview.updatedAt}
+        isRefreshing={isFetching || snapshotQuery.isFetching}
+      />
       <div className="space-y-6 px-4 py-6 md:px-6">
         <Card className="p-4">
           <div className="flex flex-wrap items-center gap-2">
@@ -37,7 +43,7 @@ export default function TrafficPage() {
         </Card>
 
         {isLoading ? <WidgetState state="loading" message="Loading traffic analytics..." /> : null}
-        {error ? <WidgetState state="error" message={error} onRetry={() => void refetch()} /> : null}
+        {error ? <WidgetState state="error" message={error.message} onRetry={() => void refetch()} /> : null}
 
         {!isLoading && !error && data ? (
           <section className="space-y-6">

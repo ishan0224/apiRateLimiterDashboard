@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants/dashboard";
 import { keysQuerySchema, parseRangeParams } from "@/lib/api/schemas";
 import { fetchApiKeys } from "@/lib/server/dashboard-queries";
+import { withServerCache } from "@/lib/server/cache";
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,7 +26,11 @@ export async function GET(request: NextRequest) {
     const pageSize = parsed.success ? parsed.data.pageSize ?? DEFAULT_PAGE_SIZE : DEFAULT_PAGE_SIZE;
     const search = parsed.success ? parsed.data.search : undefined;
 
-    const data = await fetchApiKeys(from, to, page, pageSize, search);
+    const data = await withServerCache(
+      `keys:${from.toISOString()}:${to.toISOString()}:${page}:${pageSize}:${search ?? ""}`,
+      15_000,
+      () => fetchApiKeys(from, to, page, pageSize, search)
+    );
 
     return NextResponse.json(data);
   } catch (error) {

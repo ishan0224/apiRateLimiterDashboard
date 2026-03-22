@@ -9,26 +9,35 @@ import { EndpointsTable } from "@/components/dashboard/tables/endpoints-table";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { useApiKeyDetail, useApiKeys } from "@/hooks/dashboard/useApiKeys";
-import { useRange } from "@/hooks/dashboard/useRange";
+import { useDashboardFilters } from "@/hooks/dashboard/useDashboardFilters";
+import { useOverviewSnapshot } from "@/hooks/dashboard/useOverview";
 import { formatInteger } from "@/lib/formatters/number";
 import { formatPercent } from "@/lib/formatters/percent";
 
+
 export default function ApiKeysPage() {
-  const { range, setRange, from, to } = useRange();
+  const { range, setRange, from, to } = useDashboardFilters();
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const keysQuery = useApiKeys(from, to, 1, 20, "");
   const detailQuery = useApiKeyDetail(selectedKey, from, to);
+  const snapshotQuery = useOverviewSnapshot(from, to);
 
   const selectedTitle = useMemo(() => detailQuery.data?.keyName ?? "Select an API key", [detailQuery.data]);
 
   return (
     <div>
-      <TopBar range={range} onRangeChange={setRange} onRefresh={() => void keysQuery.refetch()} />
+      <TopBar
+        range={range}
+        onRangeChange={setRange}
+        onRefresh={() => void keysQuery.refetch()}
+        updatedAt={snapshotQuery.data?.overview.updatedAt}
+        isRefreshing={keysQuery.isFetching || snapshotQuery.isFetching}
+      />
 
       <div className="space-y-6 px-4 py-6 md:px-6">
         {keysQuery.isLoading ? <WidgetState state="loading" message="Loading API keys..." /> : null}
-        {keysQuery.error ? <WidgetState state="error" message={keysQuery.error} onRetry={() => void keysQuery.refetch()} /> : null}
+        {keysQuery.error ? <WidgetState state="error" message={keysQuery.error.message} onRetry={() => void keysQuery.refetch()} /> : null}
         {!keysQuery.isLoading && !keysQuery.error && keysQuery.data ? (
           <section className="grid gap-6 xl:grid-cols-[2fr_1fr]">
             <Card className="p-0">
@@ -48,7 +57,7 @@ export default function ApiKeysPage() {
                 <p className="mt-3 text-sm text-slate-500">Loading key details...</p>
               ) : null}
               {selectedKey && detailQuery.error ? (
-                <p className="mt-3 text-sm text-red-600">{detailQuery.error}</p>
+                <p className="mt-3 text-sm text-red-600">{detailQuery.error.message}</p>
               ) : null}
               {selectedKey && detailQuery.data ? (
                 <div className="mt-4 space-y-4">

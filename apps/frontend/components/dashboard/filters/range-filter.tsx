@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import type { RangeOption } from "@/hooks/dashboard/useRange";
+import type { RangeOption } from "@/hooks/dashboard/useDashboardFilters";
 
 type RangeFilterProps = {
   value: RangeOption;

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { parseRangeParams } from "@/lib/api/schemas";
 import { fetchIncidents } from "@/lib/server/dashboard-queries";
+import { withServerCache } from "@/lib/server/cache";
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,7 +12,11 @@ export async function GET(request: NextRequest) {
       to: searchParams.get("to") ?? undefined,
     });
 
-    const data = await fetchIncidents(from, to);
+    const data = await withServerCache(
+      `incidents:${from.toISOString()}:${to.toISOString()}`,
+      15_000,
+      () => fetchIncidents(from, to)
+    );
 
     return NextResponse.json(data);
   } catch (error) {

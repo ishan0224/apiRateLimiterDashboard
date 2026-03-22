@@ -1,6 +1,7 @@
 import type {
   ApiKeyDetailResponse,
   ApiKeysResponse,
+  DashboardSnapshotResponse,
   IncidentsResponse,
   OverviewResponse,
   PipelineHealthResponse,
@@ -55,4 +56,8 @@ export function fetchIncidents(params: RangeParams, signal?: AbortSignal) {
 
 export function fetchPipelineHealth(signal?: AbortSignal) {
   return apiGet<PipelineHealthResponse>("/api/dashboard/pipeline-health", signal);
+}
+
+export function fetchSnapshot(params: RangeParams, signal?: AbortSignal) {
+  return apiGet<DashboardSnapshotResponse>(withParams("/api/dashboard/snapshot", params), signal);
 }

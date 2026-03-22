@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 
 import { fetchPipelineHealth } from "@/lib/server/dashboard-queries";
+import { withServerCache } from "@/lib/server/cache";
 
 export async function GET() {
   try {
-    const data = await fetchPipelineHealth();
+    const data = await withServerCache("pipeline-health", 15_000, () => fetchPipelineHealth());
 
     return NextResponse.json(data);
   } catch (error) {

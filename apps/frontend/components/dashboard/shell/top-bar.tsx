@@ -4,16 +4,17 @@ import { RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { RangeFilter } from "@/components/dashboard/filters/range-filter";
-import type { RangeOption } from "@/hooks/dashboard/useRange";
+import type { RangeOption } from "@/hooks/dashboard/useDashboardFilters";
 
 type TopBarProps = {
   range: RangeOption;
   onRangeChange: (value: RangeOption) => void;
   onRefresh: () => void;
   updatedAt?: string;
+  isRefreshing?: boolean;
 };
 
-export function TopBar({ range, onRangeChange, onRefresh, updatedAt }: TopBarProps) {
+export function TopBar({ range, onRangeChange, onRefresh, updatedAt, isRefreshing }: TopBarProps) {
   return (
     <header className="flex flex-col gap-4 border-b border-slate-200 bg-white px-6 py-4 md:flex-row md:items-center md:justify-between">
       <div>
@@ -27,7 +28,7 @@ export function TopBar({ range, onRangeChange, onRefresh, updatedAt }: TopBarPro
         <RangeFilter value={range} onChange={onRangeChange} />
         <Button variant="secondary" onClick={onRefresh}>
           <RefreshCw className="h-4 w-4" aria-hidden="true" />
-          Refresh
+          {isRefreshing ? "Updating..." : "Refresh"}
         </Button>
       </div>
     </header>
