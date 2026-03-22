@@ -58,9 +58,12 @@ export function ApiKeysTable({ rows, onSelect }: ApiKeysTableProps) {
       <table className="min-w-full border-collapse">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="border-b border-slate-200 text-left">
+            <tr key={headerGroup.id} className="border-b border-[var(--border)] text-left">
               {headerGroup.headers.map((header) => (
-                <th key={header.id} className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <th
+                  key={header.id}
+                  className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]"
+                >
                   {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                 </th>
               ))}
@@ -71,11 +74,11 @@ export function ApiKeysTable({ rows, onSelect }: ApiKeysTableProps) {
           {table.getRowModel().rows.map((row) => (
             <tr
               key={row.id}
-              className="cursor-pointer border-b border-slate-100 hover:bg-slate-50"
+              className="cursor-pointer border-b border-[var(--border)]/70 hover:bg-[var(--panel-soft)]"
               onClick={() => onSelect(row.original.keyId)}
             >
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-4 py-3 text-sm text-slate-700">
+                <td key={cell.id} className="px-4 py-3 text-sm text-[var(--text-secondary)]">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}

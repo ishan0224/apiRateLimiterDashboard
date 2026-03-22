@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <DashboardQueryProvider>
-      <div className="min-h-screen bg-slate-50 md:grid md:grid-cols-[240px_1fr]">
+      <div className="min-h-screen md:grid md:grid-cols-[250px_1fr]">
         <div className="hidden md:block">
           <Suspense fallback={null}>
             <SideNav />

@@ -5,11 +5,11 @@ import { cn } from "@/lib/utils/cn";
 type BadgeVariant = "success" | "warning" | "danger" | "info" | "neutral";
 
 const styles: Record<BadgeVariant, string> = {
-  success: "bg-emerald-50 text-emerald-700",
-  warning: "bg-amber-50 text-amber-700",
-  danger: "bg-red-50 text-red-700",
-  info: "bg-sky-50 text-sky-700",
-  neutral: "bg-slate-100 text-slate-700",
+  success: "bg-[var(--status-success-bg)] text-[var(--status-success-fg)]",
+  warning: "bg-[var(--status-warning-bg)] text-[var(--status-warning-fg)]",
+  danger: "bg-[var(--status-danger-bg)] text-[var(--status-danger-fg)]",
+  info: "bg-[var(--status-info-bg)] text-[var(--status-info-fg)]",
+  neutral: "bg-[var(--status-neutral-bg)] text-[var(--status-neutral-fg)]",
 };
 
 type BadgeProps = {
@@ -20,7 +20,13 @@ type BadgeProps = {
 
 export function Badge({ variant = "neutral", children, className }: BadgeProps) {
   return (
-    <span className={cn("inline-flex rounded-full px-2.5 py-1 text-xs font-medium", styles[variant], className)}>
+    <span
+      className={cn(
+        "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.06em]",
+        styles[variant],
+        className
+      )}
+    >
       {children}
     </span>
   );

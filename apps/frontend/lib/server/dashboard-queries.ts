@@ -1,4 +1,5 @@
 import { getPool } from "./db";
+import { fetchQueueLagSeconds } from "./sqs-metrics";
 import type {
   ApiKeyDetailResponse,
   ApiKeysResponse,
@@ -406,21 +407,21 @@ export async function fetchIncidents(from: Date, to: Date): Promise<IncidentsRes
 }
 
 export async function fetchPipelineHealth(): Promise<PipelineHealthResponse> {
-  const latestIngestRes = await getPool().query<{ ts: string | null }>(
-    `
-      SELECT MAX(timestamp)::text AS ts
-      FROM "UsageLog"
-    `
-  );
+  const [latestIngestRes, sqsLagSeconds] = await Promise.all([
+    getPool().query<{ ts: string | null }>(
+      `
+        SELECT MAX(timestamp)::text AS ts
+        FROM "UsageLog"
+      `
+    ),
+    fetchQueueLagSeconds(),
+  ]);
 
-  const now = Date.now();
   const lastIngest = latestIngestRes.rows[0]?.ts ? new Date(latestIngestRes.rows[0].ts) : null;
-
-  const queueLagSeconds = lastIngest ? Math.max(0, Math.floor((now - lastIngest.getTime()) / 1000)) : 0;
 
   return {
     lambdaFailureRate: 0,
-    queueLagSeconds,
+    queueLagSeconds: sqsLagSeconds ?? 0,
     lastIngestAt: lastIngest?.toISOString() ?? null,
   };
 }

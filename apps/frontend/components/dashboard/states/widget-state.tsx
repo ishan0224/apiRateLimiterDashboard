@@ -10,16 +10,18 @@ type WidgetStateProps = {
 };
 
 export function WidgetState({ state, message, onRetry }: WidgetStateProps) {
+  const iconColor = state === "loading" ? "text-[var(--status-info-fg)]" : "text-[var(--status-warning-fg)]";
+
   return (
     <Card className="p-6">
-      <div className="flex min-h-40 flex-col items-center justify-center gap-3 text-center">
+      <div className="flex min-h-44 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[var(--border)] bg-[var(--panel-soft)]/60 text-center">
         {state === "loading" ? (
-          <Loader2 className="h-5 w-5 animate-spin text-slate-500" aria-hidden="true" />
+          <Loader2 className={`h-5 w-5 animate-spin ${iconColor}`} aria-hidden="true" />
         ) : (
-          <AlertTriangle className="h-5 w-5 text-slate-500" aria-hidden="true" />
+          <AlertTriangle className={`h-5 w-5 ${iconColor}`} aria-hidden="true" />
         )}
-        <p className="text-sm text-slate-600">{message}</p>
-        {state === "error" && onRetry ? <Button onClick={onRetry}>Retry</Button> : null}
+        <p className="text-sm text-[var(--text-secondary)]">{message}</p>
+        {state === "error" && onRetry ? <Button onClick={onRetry}>Retry Query</Button> : null}
       </div>
     </Card>
   );

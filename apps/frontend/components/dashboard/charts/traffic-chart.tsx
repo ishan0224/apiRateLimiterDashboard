@@ -24,17 +24,19 @@ export function TrafficChart({ data }: TrafficChartProps) {
         <AreaChart data={data}>
           <defs>
             <linearGradient id="allowedFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#0284c7" stopOpacity={0.35} />
-              <stop offset="95%" stopColor="#0284c7" stopOpacity={0.03} />
+              <stop offset="5%" stopColor="var(--chart-allowed-fill-start)" />
+              <stop offset="95%" stopColor="var(--chart-allowed-fill-end)" />
             </linearGradient>
             <linearGradient id="blockedFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#dc2626" stopOpacity={0.35} />
-              <stop offset="95%" stopColor="#dc2626" stopOpacity={0.03} />
+              <stop offset="5%" stopColor="var(--chart-blocked-fill-start)" />
+              <stop offset="95%" stopColor="var(--chart-blocked-fill-end)" />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+          <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
           <XAxis
             dataKey="ts"
+            stroke="var(--text-muted)"
+            tick={{ fill: "var(--text-muted)", fontSize: 12 }}
             tickFormatter={(value: string) =>
               new Date(value).toLocaleTimeString([], {
                 hour: "2-digit",
@@ -42,19 +44,30 @@ export function TrafficChart({ data }: TrafficChartProps) {
               })
             }
           />
-          <YAxis allowDecimals={false} />
+          <YAxis
+            allowDecimals={false}
+            stroke="var(--text-muted)"
+            tick={{ fill: "var(--text-muted)", fontSize: 12 }}
+          />
           <Tooltip
+            contentStyle={{
+              background: "var(--chart-tooltip-bg)",
+              border: "1px solid var(--border)",
+              borderRadius: 10,
+              color: "var(--text-primary)",
+            }}
+            labelStyle={{ color: "var(--text-secondary)", fontWeight: 600 }}
             labelFormatter={(value) => new Date(String(value)).toLocaleString()}
             formatter={(value, name) => [
               typeof value === "number" ? value : Number(value ?? 0),
               name === "allowed" ? "Allowed" : "Blocked",
             ]}
           />
-          <Legend />
+          <Legend wrapperStyle={{ color: "var(--text-secondary)", fontSize: 12 }} />
           <Area
             type="monotone"
             dataKey="allowed"
-            stroke="#0284c7"
+            stroke="var(--chart-allowed)"
             fill="url(#allowedFill)"
             strokeWidth={2}
             dot={false}
@@ -63,7 +76,7 @@ export function TrafficChart({ data }: TrafficChartProps) {
           <Area
             type="monotone"
             dataKey="blocked"
-            stroke="#dc2626"
+            stroke="var(--chart-blocked)"
             fill="url(#blockedFill)"
             strokeWidth={2}
             dot={false}

@@ -2,8 +2,9 @@
 
 import { RefreshCw } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { RangeFilter } from "@/components/dashboard/filters/range-filter";
+import { ThemeToggle } from "@/components/dashboard/shell/theme-toggle";
+import { Button } from "@/components/ui/button";
 import type { RangeOption } from "@/hooks/dashboard/useDashboardFilters";
 
 type TopBarProps = {
@@ -16,20 +17,21 @@ type TopBarProps = {
 
 export function TopBar({ range, onRangeChange, onRefresh, updatedAt, isRefreshing }: TopBarProps) {
   return (
-    <header className="flex flex-col gap-4 border-b border-slate-200 bg-white px-6 py-4 md:flex-row md:items-center md:justify-between">
+    <header className="z-30 border-b border-[var(--border)] bg-[color:color-mix(in_oklab,var(--bg-elevated)_88%,transparent)] px-6 py-4 backdrop-blur-md md:sticky md:top-0 md:flex md:items-center md:justify-between">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900">API Rate Limiter Dashboard</h1>
-        <p className="text-sm text-slate-500">
-          Live telemetry from Redis decisions and async persistence.
-          {updatedAt ? ` Last updated ${new Date(updatedAt).toLocaleTimeString()}.` : ""}
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">Rate Limiter Control Plane</h1>
+        <p className="text-sm text-[var(--text-secondary)]">
+          Live throughput, contention, and pipeline telemetry.
+          {updatedAt ? ` Last ingest ${new Date(updatedAt).toLocaleTimeString()}.` : " Waiting for ingest signal."}
         </p>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2 md:mt-0">
         <RangeFilter value={range} onChange={onRangeChange} />
         <Button variant="secondary" onClick={onRefresh}>
-          <RefreshCw className="h-4 w-4" aria-hidden="true" />
-          {isRefreshing ? "Updating..." : "Refresh"}
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} aria-hidden="true" />
+          {isRefreshing ? "Refreshing" : "Refresh"}
         </Button>
+        <ThemeToggle />
       </div>
     </header>
   );

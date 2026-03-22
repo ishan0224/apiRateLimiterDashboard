@@ -4,23 +4,111 @@
 
 @layer base {
   :root {
+    color-scheme: dark;
+    --bg: #090f1b;
+    --bg-elevated: #0d1625;
+    --panel: #111c2f;
+    --panel-soft: #13213a;
+    --border: #253650;
+    --text-primary: #eaf4ff;
+    --text-secondary: #a8bfd5;
+    --text-muted: #7c95ad;
+    --focus-ring: #54c4ff;
+
+    --status-success-fg: #35f6b2;
+    --status-success-bg: rgba(53, 246, 178, 0.14);
+    --status-warning-fg: #ffc766;
+    --status-warning-bg: rgba(255, 199, 102, 0.16);
+    --status-danger-fg: #ff7e87;
+    --status-danger-bg: rgba(255, 126, 135, 0.16);
+    --status-info-fg: #77c8ff;
+    --status-info-bg: rgba(119, 200, 255, 0.14);
+    --status-neutral-fg: #aec5db;
+    --status-neutral-bg: rgba(174, 197, 219, 0.14);
+
+    --chart-allowed: #35f6b2;
+    --chart-allowed-fill-start: rgba(53, 246, 178, 0.45);
+    --chart-allowed-fill-end: rgba(53, 246, 178, 0.04);
+    --chart-blocked: #ff7e87;
+    --chart-blocked-fill-start: rgba(255, 126, 135, 0.45);
+    --chart-blocked-fill-end: rgba(255, 126, 135, 0.05);
+    --chart-grid: #2a3f5f;
+    --chart-tooltip-bg: #0f1a2c;
+
+    --kpi-glow: rgba(85, 196, 255, 0.25);
+  }
+
+  :root[data-theme="light"] {
     color-scheme: light;
+    --bg: #eef2f6;
+    --bg-elevated: #f6f8fb;
+    --panel: #ffffff;
+    --panel-soft: #f4f7fb;
+    --border: #d6dde7;
+    --text-primary: #102033;
+    --text-secondary: #334a63;
+    --text-muted: #60748c;
+    --focus-ring: #0077c8;
+
+    --status-success-fg: #0a8f60;
+    --status-success-bg: rgba(10, 143, 96, 0.12);
+    --status-warning-fg: #a46300;
+    --status-warning-bg: rgba(164, 99, 0, 0.14);
+    --status-danger-fg: #b4232d;
+    --status-danger-bg: rgba(180, 35, 45, 0.12);
+    --status-info-fg: #005f99;
+    --status-info-bg: rgba(0, 95, 153, 0.1);
+    --status-neutral-fg: #3c5269;
+    --status-neutral-bg: rgba(60, 82, 105, 0.08);
+
+    --chart-allowed: #0a8f60;
+    --chart-allowed-fill-start: rgba(10, 143, 96, 0.25);
+    --chart-allowed-fill-end: rgba(10, 143, 96, 0.03);
+    --chart-blocked: #b4232d;
+    --chart-blocked-fill-start: rgba(180, 35, 45, 0.25);
+    --chart-blocked-fill-end: rgba(180, 35, 45, 0.03);
+    --chart-grid: #d5dde7;
+    --chart-tooltip-bg: #ffffff;
+
+    --kpi-glow: rgba(0, 119, 200, 0.14);
   }
 
   * {
-    @apply border-slate-200;
+    border-color: var(--border);
+  }
+
+  html,
+  body {
+    min-height: 100%;
   }
 
   body {
-    @apply bg-slate-50 text-slate-900;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(84, 196, 255, 0.12), transparent 32%),
+      radial-gradient(circle at 85% 10%, rgba(53, 246, 178, 0.11), transparent 34%),
+      linear-gradient(180deg, var(--bg-elevated), var(--bg));
+    color: var(--text-primary);
     font-family:
       "Manrope",
       "Segoe UI",
-      "Inter",
       -apple-system,
       BlinkMacSystemFont,
       "Helvetica Neue",
       sans-serif;
+    text-rendering: geometricPrecision;
+  }
+
+  body::before {
+    content: "";
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image:
+      linear-gradient(to right, rgba(118, 153, 188, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(118, 153, 188, 0.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.75), transparent 85%);
   }
 
   code,

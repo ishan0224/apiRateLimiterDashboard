@@ -9,6 +9,7 @@ const tokenBucketStrategy = new TokenBucketStrategy(redis);
 
 export type RateLimitResult = RateLimitDecision & {
   identifierSource: "api-key" | "ip";
+  identifier: string;
 };
 
 export async function enforceRateLimit(request: NextRequest): Promise<RateLimitResult> {
@@ -19,5 +20,6 @@ export async function enforceRateLimit(request: NextRequest): Promise<RateLimitR
   return {
     ...decision,
     identifierSource: identifier.source,
+    identifier: identifier.redisKey,
   };
 }

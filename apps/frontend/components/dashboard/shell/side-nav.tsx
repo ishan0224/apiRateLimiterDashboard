@@ -88,8 +88,9 @@ export function SideNav() {
   };
 
   return (
-    <aside className="sticky top-0 h-screen w-full border-r border-slate-200 bg-white px-4 py-6">
-      <p className="mb-6 text-lg font-semibold text-slate-900">Rate Limiter</p>
+    <aside className="sticky top-0 h-screen w-full border-r border-[var(--border)] bg-[color:color-mix(in_oklab,var(--bg-elevated)_88%,transparent)] px-4 py-6 backdrop-blur-sm">
+      <p className="mb-1 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)]">Observability</p>
+      <p className="mb-6 text-lg font-bold text-[var(--text-primary)]">Limiter Console</p>
       <nav className="space-y-1">
         {items.map((item) => {
           const active = pathname.startsWith(item.href);
@@ -106,8 +107,10 @@ export function SideNav() {
                 void prefetchByRoute(item.href);
               }}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                active ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
+                "group flex items-center gap-3 rounded-lg border px-3 py-2 text-sm font-semibold transition-colors",
+                active
+                  ? "border-[var(--status-info-fg)] bg-[var(--status-info-bg)] text-[var(--text-primary)]"
+                  : "border-transparent text-[var(--text-secondary)] hover:border-[var(--border)] hover:bg-[var(--panel-soft)] hover:text-[var(--text-primary)]"
               )}
             >
               <Icon className="h-4 w-4" aria-hidden="true" />
