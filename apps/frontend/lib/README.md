@@ -7,3 +7,5 @@ Future contents may include:
 - formatting and parsing helpers
 - constants
 - integration helpers used across the app router and components
+
+Current integrations also include AWS SQS helper code used by middleware for asynchronous request-log publishing.

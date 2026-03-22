@@ -12,8 +12,8 @@ export interface RateLimitingStrategy {
   evaluate(redisKey: string, nowInMilliseconds: number): Promise<RateLimitDecision>;
 }
 
-const BUCKET_SIZE = 100;
-const REFILL_RATE_PER_SECOND = 10;
+const BUCKET_SIZE = 5;
+const REFILL_RATE_PER_SECOND = 1 / 6;
 const REFILL_RATE_PER_MILLISECOND = REFILL_RATE_PER_SECOND / 1000;
 const FULL_REFILL_TIME_MS = Math.ceil(BUCKET_SIZE / REFILL_RATE_PER_MILLISECOND);
 const KEY_TTL_MS = FULL_REFILL_TIME_MS * 2;

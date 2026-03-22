@@ -5,7 +5,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "API Rate Limiter Dashboard",
-  description: "Frontend application scaffold for the API Rate Limiter Dashboard.",
+  description: "Live API rate-limiting analytics and pipeline health dashboard.",
 };
 
 type RootLayoutProps = {
@@ -15,7 +15,7 @@ type RootLayoutProps = {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

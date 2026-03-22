@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 export default function HomePage() {
-  return <h1>API Rate Limiter Dashboard</h1>;
+  redirect("/overview");
 }
