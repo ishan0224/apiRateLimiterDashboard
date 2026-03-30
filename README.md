@@ -135,8 +135,6 @@ npm run sst:deploy
 npm run sst:remove
 ```
 
-If you shut down cloud resources to avoid costs, keep the demo GIF + architecture notes in this README so reviewers can still evaluate the project end-to-end.
-
 ## Repository Status
 
 This repository is designed as a portfolio artifact showcasing:
