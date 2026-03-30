@@ -1,4 +1,4 @@
-# API Rate Limiter Control Plane
+# API Rate Limiter Dashboard
 
 Operator-facing rate limiter + observability dashboard built with Next.js, Redis token bucket logic, SQS async logging, Lambda ingestion, and Postgres analytics.
 
