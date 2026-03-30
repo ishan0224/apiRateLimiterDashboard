@@ -5,10 +5,10 @@ Operator-facing rate limiter + observability dashboard built with Next.js, Redis
 ## Demo
 
 ### Operator Dashboard
-![Dashboard Overview](docs/demo1.gif)
+![Rate Limiting Logic](docs/demo2.gif)
 
 ### Rate Limiter in Action
-![Rate Limiting Logic](docs/demo2.gif)
+![Dashboard Overview](docs/demo1.gif)
 
 ## Why This Project
 
