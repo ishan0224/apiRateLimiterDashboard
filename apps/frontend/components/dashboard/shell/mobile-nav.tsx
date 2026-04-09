@@ -8,17 +8,17 @@ import { cn } from "@/lib/utils/cn";
 
 const items = [
   { href: "/overview", label: "Overview", icon: Gauge },
-  { href: "/api-keys", label: "Keys", icon: KeyRound },
   { href: "/traffic", label: "Traffic", icon: Activity },
-  { href: "/incidents", label: "Incidents", icon: ShieldAlert },
-];
+  { href: "/api-keys", label: "Keys", icon: KeyRound },
+  { href: "/incidents", label: "Problems", icon: ShieldAlert },
+] as const;
 
 export function MobileNav() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-[var(--border)] bg-[color:color-mix(in_oklab,var(--bg-elevated)_88%,transparent)] px-3 py-2 backdrop-blur-md md:hidden">
+    <nav className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg-surface)] px-2 py-2 md:hidden">
       <ul className="grid grid-cols-4 gap-1">
         {items.map((item) => {
           const Icon = item.icon;
@@ -29,10 +29,10 @@ export function MobileNav() {
               <Link
                 href={`${item.href}?${searchParams.toString()}`}
                 className={cn(
-                  "flex flex-col items-center gap-1 rounded-lg border px-1 py-2 text-[11px] font-semibold",
+                  "focus-ring flex flex-col items-center gap-1 border-l-[3px] px-1 py-1.5 text-[11px] font-medium",
                   active
-                    ? "border-[var(--status-info-fg)] bg-[var(--status-info-bg)] text-[var(--text-primary)]"
-                    : "border-transparent text-[var(--text-secondary)] hover:border-[var(--border)] hover:bg-[var(--panel-soft)]"
+                    ? "border-l-[var(--brand-orange)] bg-[rgba(240,90,40,0.12)] text-[var(--brand-orange)]"
+                    : "border-l-transparent text-[var(--text-secondary)]"
                 )}
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />

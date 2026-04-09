@@ -10,18 +10,22 @@ type WidgetStateProps = {
 };
 
 export function WidgetState({ state, message, onRetry }: WidgetStateProps) {
-  const iconColor = state === "loading" ? "text-[var(--status-info-fg)]" : "text-[var(--status-warning-fg)]";
+  const iconColor = state === "loading" ? "var(--status-info)" : "var(--status-warn)";
 
   return (
-    <Card className="p-6">
-      <div className="flex min-h-44 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[var(--border)] bg-[var(--panel-soft)]/60 text-center">
+    <Card className="p-4">
+      <div className="flex min-h-32 flex-col items-center justify-center gap-2 rounded-[3px] border border-[var(--border-subtle)] bg-[var(--bg-panel-deep)] text-center">
         {state === "loading" ? (
-          <Loader2 className={`h-5 w-5 animate-spin ${iconColor}`} aria-hidden="true" />
+          <Loader2 className="h-4 w-4 animate-spin" style={{ color: iconColor }} aria-hidden="true" />
         ) : (
-          <AlertTriangle className={`h-5 w-5 ${iconColor}`} aria-hidden="true" />
+          <AlertTriangle className="h-4 w-4" style={{ color: iconColor }} aria-hidden="true" />
         )}
-        <p className="text-sm text-[var(--text-secondary)]">{message}</p>
-        {state === "error" && onRetry ? <Button onClick={onRetry}>Retry Query</Button> : null}
+        <p className="text-[11px] text-[var(--text-secondary)]">{message}</p>
+        {state === "error" && onRetry ? (
+          <Button variant="secondary" onClick={onRetry}>
+            Retry Query
+          </Button>
+        ) : null}
       </div>
     </Card>
   );

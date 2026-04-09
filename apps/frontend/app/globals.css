@@ -5,76 +5,37 @@
 @layer base {
   :root {
     color-scheme: dark;
-    --bg: #090f1b;
-    --bg-elevated: #0d1625;
-    --panel: #111c2f;
-    --panel-soft: #13213a;
-    --border: #253650;
-    --text-primary: #eaf4ff;
-    --text-secondary: #a8bfd5;
-    --text-muted: #7c95ad;
-    --focus-ring: #54c4ff;
+    --bg-base: #0f1318;
+    --bg-surface: #161a1f;
+    --bg-panel: #181c21;
+    --bg-panel-deep: #14181d;
+    --border: #1f2328;
+    --border-subtle: #1b1f24;
 
-    --status-success-fg: #35f6b2;
-    --status-success-bg: rgba(53, 246, 178, 0.14);
-    --status-warning-fg: #ffc766;
-    --status-warning-bg: rgba(255, 199, 102, 0.16);
-    --status-danger-fg: #ff7e87;
-    --status-danger-bg: rgba(255, 126, 135, 0.16);
-    --status-info-fg: #77c8ff;
-    --status-info-bg: rgba(119, 200, 255, 0.14);
-    --status-neutral-fg: #aec5db;
-    --status-neutral-bg: rgba(174, 197, 219, 0.14);
+    --text-primary: #e6ebf1;
+    --text-secondary: #9aa2ad;
+    --text-muted: #6d7682;
+    --text-label: #7f8996;
 
-    --chart-allowed: #35f6b2;
-    --chart-allowed-fill-start: rgba(53, 246, 178, 0.45);
-    --chart-allowed-fill-end: rgba(53, 246, 178, 0.04);
-    --chart-blocked: #ff7e87;
-    --chart-blocked-fill-start: rgba(255, 126, 135, 0.45);
-    --chart-blocked-fill-end: rgba(255, 126, 135, 0.05);
-    --chart-grid: #2a3f5f;
-    --chart-tooltip-bg: #0f1a2c;
+    --accent-blue: #5794f2;
+    --accent-blue-soft: #5794f2;
+    --brand-orange: #f05a28;
 
-    --kpi-glow: rgba(85, 196, 255, 0.25);
-  }
+    --status-ok: #73bf69;
+    --status-warn: #f2cc0c;
+    --status-crit: #f55f3e;
+    --status-info: #5794f2;
 
-  :root[data-theme="light"] {
-    color-scheme: light;
-    --bg: #eef2f6;
-    --bg-elevated: #f6f8fb;
-    --panel: #ffffff;
-    --panel-soft: #f4f7fb;
-    --border: #d6dde7;
-    --text-primary: #102033;
-    --text-secondary: #334a63;
-    --text-muted: #60748c;
-    --focus-ring: #0077c8;
-
-    --status-success-fg: #0a8f60;
-    --status-success-bg: rgba(10, 143, 96, 0.12);
-    --status-warning-fg: #a46300;
-    --status-warning-bg: rgba(164, 99, 0, 0.14);
-    --status-danger-fg: #b4232d;
-    --status-danger-bg: rgba(180, 35, 45, 0.12);
-    --status-info-fg: #005f99;
-    --status-info-bg: rgba(0, 95, 153, 0.1);
-    --status-neutral-fg: #3c5269;
-    --status-neutral-bg: rgba(60, 82, 105, 0.08);
-
-    --chart-allowed: #0a8f60;
-    --chart-allowed-fill-start: rgba(10, 143, 96, 0.25);
-    --chart-allowed-fill-end: rgba(10, 143, 96, 0.03);
-    --chart-blocked: #b4232d;
-    --chart-blocked-fill-start: rgba(180, 35, 45, 0.25);
-    --chart-blocked-fill-end: rgba(180, 35, 45, 0.03);
-    --chart-grid: #d5dde7;
-    --chart-tooltip-bg: #ffffff;
-
-    --kpi-glow: rgba(0, 119, 200, 0.14);
+    --focus-ring: #5794f2;
+    --panel-title: #b7c0cb;
+    --panel-subtitle: #697381;
+    --mono-accent: #7fb0ff;
+    --rule-text: #a8b2be;
   }
 
   * {
     border-color: var(--border);
+    box-shadow: none;
   }
 
   html,
@@ -83,44 +44,137 @@
   }
 
   body {
-    background:
-      radial-gradient(circle at 15% 20%, rgba(84, 196, 255, 0.12), transparent 32%),
-      radial-gradient(circle at 85% 10%, rgba(53, 246, 178, 0.11), transparent 34%),
-      linear-gradient(180deg, var(--bg-elevated), var(--bg));
+    background: var(--bg-base);
     color: var(--text-primary);
+    font-size: 13px;
     font-family:
-      "Manrope",
-      "Segoe UI",
+      "Inter",
+      system-ui,
       -apple-system,
       BlinkMacSystemFont,
-      "Helvetica Neue",
+      "Segoe UI",
       sans-serif;
-    text-rendering: geometricPrecision;
-  }
-
-  body::before {
-    content: "";
-    pointer-events: none;
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background-image:
-      linear-gradient(to right, rgba(118, 153, 188, 0.08) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(118, 153, 188, 0.07) 1px, transparent 1px);
-    background-size: 28px 28px;
-    mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.75), transparent 85%);
+    line-height: 1.45;
+    text-rendering: optimizeLegibility;
   }
 
   code,
   pre,
   .font-mono {
     font-family:
-      "JetBrains Mono",
+      "Roboto Mono",
       "SFMono-Regular",
       Menlo,
       Monaco,
       Consolas,
       "Liberation Mono",
       monospace;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-size: 13px;
+  }
+
+  a,
+  button {
+    transition-property: background-color, border-color, color;
+    transition-duration: 120ms;
+  }
+
+  .panel {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--bg-panel);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--panel-title);
+  }
+
+  .panel-subtitle {
+    font-size: 11px;
+    color: var(--panel-subtitle);
+  }
+
+  .label-xs {
+    font-size: 11px;
+    color: var(--text-label);
+    letter-spacing: 0.02em;
+  }
+
+  .label-upper {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  .value-number {
+    font-size: 28px;
+    font-weight: 300;
+    line-height: 1.1;
+    color: var(--text-primary);
+  }
+
+  .value-text {
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 1.2;
+    color: var(--text-primary);
+  }
+
+  .focus-ring {
+    outline: none;
+  }
+
+  .focus-ring:focus-visible {
+    box-shadow: 0 0 0 2px rgba(87, 148, 242, 0.35);
+  }
+
+  .table-header-cell {
+    background: var(--bg-surface);
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+
+  .table-row {
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--bg-panel-deep);
+  }
+
+  .table-row:hover {
+    background: #20252b;
+  }
+
+  .mono-tag {
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-size: 11px;
+    line-height: 1.2;
+    padding: 2px 6px;
+  }
+
+  .mono-tag-key {
+    color: var(--mono-accent);
   }
 }

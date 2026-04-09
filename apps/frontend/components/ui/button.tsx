@@ -5,11 +5,11 @@ import { cn } from "@/lib/utils/cn";
 type ButtonVariant = "primary" | "secondary" | "ghost";
 
 const styles: Record<ButtonVariant, string> = {
-  primary:
-    "bg-[var(--status-info-fg)] text-[var(--bg)] hover:brightness-110 shadow-[0_0_0_1px_rgba(0,0,0,0.08)]",
+  primary: "border border-[var(--accent-blue)] bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90",
   secondary:
-    "bg-[var(--panel-soft)] text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--panel)]",
-  ghost: "bg-transparent text-[var(--text-secondary)] hover:bg-[var(--panel-soft)]",
+    "border border-[var(--border)] bg-[var(--bg-panel)] text-[var(--text-secondary)] hover:bg-[var(--bg-panel-deep)] hover:text-[var(--text-primary)]",
+  ghost:
+    "border border-transparent bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-panel-deep)] hover:text-[var(--text-primary)]",
 };
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -21,9 +21,7 @@ export function Button({ variant = "secondary", className, children, ...props }:
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold",
-        "transition-colors duration-150",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
+        "focus-ring inline-flex min-h-8 items-center justify-center gap-2 rounded-[3px] px-3 py-1.5 text-[11px] font-medium",
         "disabled:cursor-not-allowed disabled:opacity-50",
         styles[variant],
         className

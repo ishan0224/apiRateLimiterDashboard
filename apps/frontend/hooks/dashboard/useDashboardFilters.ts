@@ -1,21 +1,35 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { DEFAULT_RANGE_HOURS } from "@/lib/constants/dashboard";
+import {
+  computeQuickRange,
+  formatRangeLabel,
+  isQuickRangeKey,
+  isValidRange,
+  MAX_RANGE_WINDOW_MS,
+  type TimeZoneValue,
+  type QuickRangeKey,
+} from "@/lib/time-range";
 
-export type RangeOption = "1h" | "24h" | "7d";
 export type GranularityOption = "15m" | "1h" | "1d";
+const CUSTOM_RANGE_TOKEN = "custom";
 
-function normalizeRange(value: string | null): RangeOption {
-  if (value === "1h" || value === "7d" || value === "24h") {
-    return value;
-  }
+export type ActiveRange = {
+  from: Date;
+  to: Date;
+  label: string;
+  quickRangeKey: QuickRangeKey | null;
+  timeZone: TimeZoneValue;
+};
 
-  return "24h";
-}
+export type ApplyRangeInput = {
+  from: Date;
+  to: Date;
+  quickRangeKey?: QuickRangeKey | null;
+  timeZone?: TimeZoneValue;
+};
 
 function normalizeGranularity(value: string | null): GranularityOption {
   if (value === "15m" || value === "1h" || value === "1d") {
@@ -25,65 +39,131 @@ function normalizeGranularity(value: string | null): GranularityOption {
   return "1h";
 }
 
-function toRange(range: RangeOption) {
-  const anchor = new Date();
-  const from = new Date(anchor);
-
-  if (range === "1h") {
-    from.setHours(anchor.getHours() - 1);
-  } else if (range === "7d") {
-    from.setDate(anchor.getDate() - 7);
-  } else {
-    from.setHours(anchor.getHours() - DEFAULT_RANGE_HOURS);
+function parseDate(value: string | null): Date | null {
+  if (!value) {
+    return null;
   }
 
-  return { from: from.toISOString(), to: anchor.toISOString() };
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  return parsed;
+}
+
+function normalizeTimeZone(value: string | null): TimeZoneValue {
+  if (!value) {
+    return "browser";
+  }
+
+  return value;
+}
+
+function defaultRange(timeZone: TimeZoneValue) {
+  const quickRangeKey: QuickRangeKey = "last_5_minutes";
+  const computed = computeQuickRange(quickRangeKey, new Date(), timeZone);
+  return {
+    from: computed.from,
+    to: computed.to,
+    quickRangeKey,
+  };
+}
+
+function resolveActiveRange(searchParams: URLSearchParams): ActiveRange {
+  const timeZone = normalizeTimeZone(searchParams.get("tz"));
+  const quickRangeKeyRaw = searchParams.get("quickRange");
+  const isCustomRange = quickRangeKeyRaw === CUSTOM_RANGE_TOKEN;
+  const quickRangeKey = isQuickRangeKey(quickRangeKeyRaw) ? quickRangeKeyRaw : null;
+
+  const parsedFrom = parseDate(searchParams.get("from"));
+  const parsedTo = parseDate(searchParams.get("to"));
+
+  if (quickRangeKey) {
+    const resolved = computeQuickRange(quickRangeKey, new Date(), timeZone);
+    return {
+      from: resolved.from,
+      to: resolved.to,
+      quickRangeKey,
+      timeZone,
+      label: formatRangeLabel(resolved.from, resolved.to, quickRangeKey, timeZone),
+    };
+  }
+
+  if (isCustomRange && parsedFrom && parsedTo && isValidRange(parsedFrom, parsedTo, MAX_RANGE_WINDOW_MS)) {
+    return {
+      from: parsedFrom,
+      to: parsedTo,
+      quickRangeKey: null,
+      timeZone,
+      label: formatRangeLabel(parsedFrom, parsedTo, null, timeZone),
+    };
+  }
+
+  const fallback = defaultRange(timeZone);
+  return {
+    from: fallback.from,
+    to: fallback.to,
+    quickRangeKey: fallback.quickRangeKey,
+    timeZone,
+    label: formatRangeLabel(fallback.from, fallback.to, fallback.quickRangeKey, timeZone),
+  };
 }
 
 export function useDashboardFilters() {
   const router = useRouter();
   const pathname = usePathname();
-  const [queryString, setQueryString] = useState("");
-  const searchParams = useMemo(() => new URLSearchParams(queryString), [queryString]);
+  const searchParams = useSearchParams();
+  const searchParamsText = searchParams.toString();
+  const activeRange = useMemo(
+    () => resolveActiveRange(new URLSearchParams(searchParamsText)),
+    [searchParamsText]
+  );
 
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const sync = () => {
-      setQueryString(window.location.search.slice(1));
-    };
-
-    sync();
-    window.addEventListener("popstate", sync);
-
-    return () => {
-      window.removeEventListener("popstate", sync);
-    };
-  }, []);
-
-  const range = normalizeRange(searchParams.get("range"));
-  const granularity = normalizeGranularity(searchParams.get("granularity"));
-
-  const setParam = useCallback(
-    (key: string, value: string) => {
+  const updateParams = useCallback(
+    (updates: Record<string, string | null>) => {
       const params = new URLSearchParams(searchParams.toString());
-      params.set(key, value);
+
+      for (const [key, value] of Object.entries(updates)) {
+        if (!value) {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+
       const nextQuery = params.toString();
-      setQueryString(nextQuery);
-      router.replace(`${pathname}?${nextQuery}`, { scroll: false });
+      router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
     },
     [pathname, router, searchParams]
   );
 
-  const rangeValues = useMemo(() => toRange(range), [range]);
+  const applyRange = useCallback(
+    ({ from, to, quickRangeKey = null, timeZone = activeRange.timeZone }: ApplyRangeInput): boolean => {
+      if (!isValidRange(from, to, MAX_RANGE_WINDOW_MS)) {
+        return false;
+      }
+
+      updateParams({
+        from: from.toISOString(),
+        to: to.toISOString(),
+        quickRange: quickRangeKey ?? CUSTOM_RANGE_TOKEN,
+        tz: timeZone,
+      });
+
+      return true;
+    },
+    [activeRange.timeZone, updateParams]
+  );
+
+  const granularity = normalizeGranularity(searchParams.get("granularity"));
 
   return {
-    range,
-    setRange: (value: RangeOption) => setParam("range", value),
+    from: activeRange.from.toISOString(),
+    to: activeRange.to.toISOString(),
+    activeRange,
+    applyRange,
     granularity,
-    setGranularity: (value: GranularityOption) => setParam("granularity", value),
-    ...rangeValues,
+    setGranularity: (value: GranularityOption) => updateParams({ granularity: value }),
   };
 }

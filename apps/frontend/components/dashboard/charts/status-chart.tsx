@@ -1,7 +1,5 @@
 "use client";
 
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-
 type StatusDatum = {
   status: number;
   count: number;
@@ -11,48 +9,47 @@ type StatusChartProps = {
   data: StatusDatum[];
 };
 
-const colors = [
-  "var(--status-info-fg)",
-  "var(--status-success-fg)",
-  "var(--status-warning-fg)",
-  "var(--status-danger-fg)",
-  "#826ef9",
-  "#2bbfb6",
-];
+function getTone(status: number) {
+  if (status >= 500) {
+    return "var(--status-crit)";
+  }
+
+  if (status === 429) {
+    return "var(--status-crit)";
+  }
+
+  if (status >= 400) {
+    return "var(--status-warn)";
+  }
+
+  if (status >= 300) {
+    return "var(--status-info)";
+  }
+
+  return "var(--status-ok)";
+}
 
 export function StatusChart({ data }: StatusChartProps) {
+  const total = data.reduce((sum, row) => sum + row.count, 0);
+
   return (
-    <div className="h-72 w-full">
-      <ResponsiveContainer>
-        <PieChart>
-          <Pie
-            data={data}
-            dataKey="count"
-            nameKey="status"
-            cx="50%"
-            cy="50%"
-            outerRadius={96}
-            label
-            labelLine={false}
-          >
-            {data.map((entry, index) => (
-              <Cell key={`${entry.status}-${index}`} fill={colors[index % colors.length]} />
-            ))}
-          </Pie>
-          <Tooltip
-            contentStyle={{
-              background: "var(--chart-tooltip-bg)",
-              border: "1px solid var(--border)",
-              borderRadius: 10,
-              color: "var(--text-primary)",
-            }}
-            formatter={(value, name) => [
-              typeof value === "number" ? value : Number(value ?? 0),
-              `HTTP ${name}`,
-            ]}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+    <div className="space-y-2">
+      {data.map((row) => {
+        const percent = total > 0 ? (row.count / total) * 100 : 0;
+
+        return (
+          <div key={row.status} className="grid grid-cols-[70px_1fr_56px] items-center gap-2">
+            <span className="font-mono text-[11px] text-[var(--text-secondary)]">HTTP {row.status}</span>
+            <div className="relative h-[7px] overflow-hidden rounded-[2px] border border-[var(--border)] bg-[var(--bg-panel-deep)]">
+              <div
+                className="absolute inset-y-0 left-0"
+                style={{ width: `${percent}%`, background: getTone(row.status), opacity: 0.55 }}
+              />
+            </div>
+            <span className="text-right text-[11px] text-[var(--text-secondary)]">{row.count}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }

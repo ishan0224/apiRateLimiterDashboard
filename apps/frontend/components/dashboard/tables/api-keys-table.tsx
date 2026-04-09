@@ -8,6 +8,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/formatters/date";
 import { formatInteger } from "@/lib/formatters/number";
 import { formatPercent } from "@/lib/formatters/percent";
@@ -20,31 +22,60 @@ type ApiKeysTableProps = {
 
 const columnHelper = createColumnHelper<ApiKeyRow>();
 
+function getStatus(row: ApiKeyRow) {
+  if (row.blockedRate >= 0.35) {
+    return { text: "OBSERVE", variant: "warning" as const };
+  }
+
+  if (row.lastSeenAt && Date.now() - new Date(row.lastSeenAt).getTime() < 15 * 60 * 1000) {
+    return { text: "LIVE", variant: "info" as const };
+  }
+
+  return { text: "HEALTHY", variant: "success" as const };
+}
+
 export function ApiKeysTable({ rows, onSelect }: ApiKeysTableProps) {
   const columns = useMemo(
     () => [
       columnHelper.accessor("keyName", {
         header: "Key",
-        cell: (info) => info.getValue(),
+        cell: (info) => <span className="font-mono text-[11px] text-[var(--mono-accent)]">{info.getValue()}</span>,
       }),
       columnHelper.accessor("configuredRateLimit", {
         header: "Rate Limit",
-        cell: (info) => formatInteger(info.getValue()),
+        cell: (info) => <span className="text-[12px] text-[var(--text-secondary)]">{formatInteger(info.getValue())}</span>,
       }),
       columnHelper.accessor("requestsPerMin", {
         header: "Requests",
-        cell: (info) => formatInteger(info.getValue()),
+        cell: (info) => <span className="text-[12px] text-[var(--text-secondary)]">{formatInteger(info.getValue())}</span>,
       }),
       columnHelper.accessor("blockedRate", {
         header: "Blocked %",
-        cell: (info) => formatPercent(info.getValue()),
+        cell: (info) => <span className="text-[12px] text-[var(--text-secondary)]">{formatPercent(info.getValue())}</span>,
       }),
       columnHelper.accessor("lastSeenAt", {
         header: "Last Seen",
-        cell: (info) => formatDateTime(info.getValue()),
+        cell: (info) => <span className="text-[12px] text-[var(--text-secondary)]">{formatDateTime(info.getValue())}</span>,
+      }),
+      columnHelper.display({
+        id: "status",
+        header: "Status",
+        cell: (info) => {
+          const status = getStatus(info.row.original);
+          return <Badge variant={status.variant}>{status.text}</Badge>;
+        },
+      }),
+      columnHelper.display({
+        id: "actions",
+        header: "Actions",
+        cell: (info) => (
+          <Button variant="secondary" className="rounded-[2px] px-2 py-1 text-[11px]" onClick={() => onSelect(info.row.original.keyId)}>
+            Inspect
+          </Button>
+        ),
       }),
     ],
-    []
+    [onSelect]
   );
 
   const table = useReactTable({
@@ -60,10 +91,7 @@ export function ApiKeysTable({ rows, onSelect }: ApiKeysTableProps) {
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id} className="border-b border-[var(--border)] text-left">
               {headerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]"
-                >
+                <th key={header.id} className="table-header-cell px-3 py-2">
                   {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                 </th>
               ))}
@@ -72,13 +100,9 @@ export function ApiKeysTable({ rows, onSelect }: ApiKeysTableProps) {
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr
-              key={row.id}
-              className="cursor-pointer border-b border-[var(--border)]/70 hover:bg-[var(--panel-soft)]"
-              onClick={() => onSelect(row.original.keyId)}
-            >
+            <tr key={row.id} className="table-row">
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-4 py-3 text-sm text-[var(--text-secondary)]">
+                <td key={cell.id} className="px-3 py-2">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
