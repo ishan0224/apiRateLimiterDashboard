@@ -1,145 +1,124 @@
 # API Rate Limiter Dashboard
 
-Operator-facing rate limiter + observability dashboard built with Next.js, Redis token bucket logic, SQS async logging, Lambda ingestion, and Postgres analytics.
+An operator-facing API gateway with a real-time observability dashboard. Enforces rate limits at the middleware layer with zero database calls on the hot path, and ships every decision asynchronously through an AWS pipeline into a live analytics dashboard.
+
+---
 
 ## Demo
 
-### Operator Dashboard
-![Rate Limiting Logic](docs/demo2.gif)
+### GIF 1
+![Rate Limiter in Action](docs/demo1.gif)
 
-### Rate Limiter in Action
-![Dashboard Overview](docs/demo1.gif)
+### GIF 2
+![Operator Dashboard](docs/demo2.gif)
 
-## Why This Project
+---
 
-This project models a real production pattern for API platforms:
+## How It Works
 
-- enforce rate limits in a fast middleware path
-- avoid hot-path database writes
-- ship decision logs asynchronously to a worker pipeline
-- expose operational visibility (throughput, blocked traffic, key pressure, pipeline health)
-
-## Architecture
-
-```text
-Client Request
-  -> Next.js Middleware (token bucket via Upstash Redis)
-      -> allow/deny + rate-limit headers
-      -> async usage event to SQS
-          -> Lambda worker consumes batch
-              -> Prisma writes UsageLog + BlockedRequest
-                  -> Dashboard APIs query Postgres
-                      -> React dashboard (overview, traffic, keys, incidents)
 ```
+Incoming Request
+  → Next.js Middleware
+      → Lua token-bucket on Upstash Redis   (allow / 429 + headers)
+      → Fire-and-forget SQS message
+          → Lambda batch worker
+              → Prisma → Neon Postgres
+                  → Next.js API routes
+                      → React dashboard
+```
+
+Every request is rate-limited in a single Redis round-trip via an atomic Lua script — no DB involved. The outcome is logged asynchronously through SQS so the hot path never waits for persistence.
+
+---
+
+## Architecture Highlights
+
+| Concern | Approach |
+|---|---|
+| Rate limiting | Atomic Lua token-bucket on Upstash Redis — 5 tokens, refills at 1/6 s |
+| Identity | `SHA-256(source:raw)` for both API keys and IPs — Redis never stores plaintext |
+| Async logging | Fire-and-forget SQS publish; middleware does not await it |
+| Ingestion | Lambda (arm64, 512 MB) consumes batches of 10 with partial-failure responses |
+| Durability | DLQ after 3 retries; 180 s visibility timeout prevents double-processing |
+| Analytics reads | Raw `pg` pool + `generate_series()` — no ORM overhead, no timeline gaps |
+| Incident detection | Heuristic on hourly buckets: ≥20% blocked → low, ≥35% → medium, ≥50% → high |
+| Infra | SST v4 provisions SQS, DLQ, and Lambda subscription declaratively |
+
+---
 
 ## Tech Stack
 
-- Frontend: Next.js App Router, React 19, Tailwind CSS, React Query, Recharts, TanStack Table
-- Rate limiting: Upstash Redis + Lua token bucket
-- Async pipeline: AWS SQS + Lambda
-- Database: Neon Postgres + Prisma
-- Infra: SST
-- Tooling: TypeScript, ESLint, Prettier
+**Frontend** — Next.js 15 (App Router), React 19, Tailwind CSS, TanStack Query, TanStack Table, Recharts
 
-## Core Features
+**Rate Limiting** — Upstash Redis, Lua scripting
 
-- API-key aware rate limiting (IP fallback when key is absent)
-- Standard limit headers on responses (`X-RateLimit-*`, `Retry-After`)
-- SQS-based async request outcome logging (`200` / `429`)
-- Lambda batch ingestion with partial failure handling
-- Dashboard pages: Overview, API Keys, Traffic, Incidents
-- Pipeline health widget support (queue lag + ingest freshness)
+**Async Pipeline** — AWS SQS (Standard + DLQ), AWS Lambda (Node 20, arm64)
 
-## Monorepo Structure
+**Database** — Neon Postgres, Prisma ORM, raw `pg` pool for reads
 
-```text
-apps/frontend   Next.js app, middleware, dashboard UI, dashboard APIs
-apps/backend    Prisma schema, worker service, backend scripts
-packages/*      shared workspace packages
-sst.config.ts   infrastructure definition (SQS, DLQ, Lambda subscription)
+**Infra / Tooling** — SST v4, TypeScript, ESLint, Prettier, npm workspaces
+
+---
+
+## Project Structure
+
 ```
+apps/frontend     Next.js app — middleware, dashboard UI, API routes
+apps/backend      Lambda worker, Prisma schema, migration scripts
+packages/         Shared types and config
+sst.config.ts     Infrastructure as Code (SQS, DLQ, Lambda)
+```
+
+---
 
 ## Local Setup
 
-### 1) Prerequisites
+**Prerequisites:** Node.js ≥ 20.9, Neon Postgres, Upstash Redis, AWS account
 
-- Node.js `>=20.9.0`
-- npm
-- Postgres database (Neon recommended)
-- Upstash Redis
-- AWS credentials + SQS queue URL
-
-### 2) Install dependencies
-
+**1. Install**
 ```bash
 npm install
 ```
 
-### 3) Environment
+**2. Configure environment**
 
-Copy `.env.example` and set values used by middleware + worker + dashboard queries.
+Copy `.env.example` into `apps/frontend/.env` and `apps/backend/.env` and fill in:
 
-Required variables include:
+```
+DATABASE_URL
+DIRECT_URL
+UPSTASH_REDIS_REST_URL
+UPSTASH_REDIS_REST_TOKEN
+AWS_REGION
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+SQS_QUEUE_URL
+```
 
-- `DATABASE_URL`
-- `DIRECT_URL`
-- `UPSTASH_REDIS_REST_URL`
-- `UPSTASH_REDIS_REST_TOKEN`
-- `AWS_REGION`
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `SQS_QUEUE_URL`
-
-### 4) Prisma
-
+**3. Run migrations**
 ```bash
 npm run prisma:generate --workspace @api-rate-limiter-dashboard/backend
 npm run prisma:migrate:dev --workspace @api-rate-limiter-dashboard/backend
 ```
 
-### 5) Run frontend
-
+**4. Start**
 ```bash
 npm run dev:frontend
 ```
 
-The app runs at `http://localhost:3000`.
+App runs at `http://localhost:3000`.
 
-## Useful Commands
+---
 
-```bash
-npm run dev:frontend
-npm run build
-npm run lint
-npm run typecheck
-npm run sst:deploy
-npm run sst:remove
-```
-
-## JMeter Testing Notes
-
-- Send `Authorization: Bearer <token>` from JMeter.
-- Ensure the token path in the middleware and ingestion flow maps to a valid `ApiKey` identity in DB.
-- Stress the same endpoint with loops/threads to trigger `429` responses.
-- Validate:
-  - response headers show limit/reset values
-  - dashboard metrics update
-  - worker persists `UsageLog` and `BlockedRequest`
-
-## Deployment and Cost Control
-
-Use SST for infra lifecycle:
+## Deployment
 
 ```bash
-npm run sst:deploy
-npm run sst:remove
+npm run sst:deploy    # provision SQS + DLQ + Lambda on AWS
+npm run sst:remove    # tear down all resources
 ```
 
-## Repository Status
+---
 
-This repository is designed as a portfolio artifact showcasing:
+## Load Testing (JMeter)
 
-- production-style rate limiting architecture
-- async observability pipeline design
-- operational dashboard UX
-
+Send `Authorization: Bearer <token>` matching a seeded `ApiKey` row. Run concurrent threads to trigger 429s and verify that rate-limit headers, dashboard metrics, and worker persistence all update correctly.
