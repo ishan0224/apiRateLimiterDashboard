@@ -52,6 +52,7 @@ pnpm-debug.log*
 .turbo/
 .cache/
 .eslintcache
+.pnpm-store/
 
 # ── OS / editor ──────────────────────────────────────────────────────────────
 .DS_Store
